@@ -1,0 +1,12 @@
+﻿{
+  "name": "com.wsp.thirdpersoncomponents",
+  "version": "1.0.0",
+  "displayName": "WSP Third Person Components",
+  "description": "Third person components for Unity",
+  "unity": "2022.3",
+  "author": {
+    "name": "WSP",
+    "email": "william.strandpaurell@gmail.com",
+    "url": ""
+  }
+}
