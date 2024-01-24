@@ -11,6 +11,7 @@ namespace Components
         [SerializeField] Vector2 cameraOffset;
         [SerializeField] float cameraSmoothing = 10f;
         [SerializeField] float cameraDistance = 5f;
+        [SerializeField] bool attachOnStart;
 
         Vector3 TargetPosition
         {
@@ -37,11 +38,12 @@ namespace Components
         void Start()
         {
             cameraAttachment = new CameraAttachment();
-            CameraBrain.Attach(cameraAttachment);
+            if (attachOnStart) CameraBrain.Attach(cameraAttachment);
         }
 
         public void Rotate(Vector2 direction, float speed)
         {
+            // Update target x and y rotation
             targetXRotation -= direction.y * speed;
             targetYRotation += direction.x * speed;
 
@@ -70,8 +72,5 @@ namespace Components
             var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
             cameraAttachment.Forward = directionToTarget;
         }
-
-
-        void FixedUpdate() { }
     }
 }
