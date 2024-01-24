@@ -4,14 +4,21 @@ namespace Components
 {
     public class CameraComponent : MonoBehaviour
     {
-        public Vector3 Forward => cameraAttachment.Forward;
-
-        [SerializeField] Transform target;
+        [Header("Camera movement")]
         [SerializeField] Vector2 rotationLimits = new(-45, 45);
+
+        [SerializeField] float cameraSmoothing = 100f;
+
+        [Header("Camera position")]
+        [SerializeField] Transform target;
+
         [SerializeField] Vector2 cameraOffset;
-        [SerializeField] float cameraSmoothing = 10f;
         [SerializeField] float cameraDistance = 5f;
+
+        [Space(10)]
         [SerializeField] bool attachOnStart;
+
+        public Vector3 Forward => cameraAttachment.Forward;
 
         Vector3 TargetPosition
         {
