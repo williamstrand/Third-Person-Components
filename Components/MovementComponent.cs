@@ -5,8 +5,8 @@ namespace Components
     public class MovementComponent : MonoBehaviour
     {
         [SerializeField] new Rigidbody rigidbody;
-        [SerializeField] float acceleration;
-        [SerializeField] float rotationSpeed;
+        [SerializeField] float acceleration = 10;
+        [SerializeField] float rotationSpeed = 10;
 
         float targetSpeed;
         float currentSpeed;
