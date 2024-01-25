@@ -8,15 +8,49 @@ namespace Components
 
         [Header("Walking")]
         [SerializeField] float acceleration = 10;
-
-        [SerializeField] float rotationSpeed = 10;
+        [SerializeField] public float rotationSpeed = 10;
 
         [Header("Jumping")]
-        [SerializeField] float jumpHeight = 6;
+        [SerializeField] public float jumpHeight = 6;
+        [SerializeField] public float groundCheckDistance = 1f;
+        [SerializeField] public float groundCheckRadius = 1f;
+        [SerializeField] public LayerMask groundLayer;
 
-        [SerializeField] float groundCheckDistance = 1f;
-        [SerializeField] float groundCheckRadius = 1f;
-        [SerializeField] LayerMask groundLayer;
+        public float Acceleration
+        {
+            get => acceleration;
+            set => acceleration = Mathf.Max(0, value);
+        }
+
+        public float RotationSpeed
+        {
+            get => rotationSpeed;
+            set => rotationSpeed = Mathf.Max(0, value);
+        }
+
+        public float JumpHeight
+        {
+            get => jumpHeight;
+            set => jumpHeight = Mathf.Max(0, value);
+        }
+
+        public float GroundCheckDistance
+        {
+            get => groundCheckDistance;
+            set => groundCheckDistance = Mathf.Max(0, value);
+        }
+
+        public float GroundCheckRadius
+        {
+            get => groundCheckRadius;
+            set => groundCheckRadius = Mathf.Max(0, value);
+        }
+
+        public LayerMask GroundLayer
+        {
+            get => groundLayer;
+            set => groundLayer = value;
+        }
 
         float targetSpeed;
         float currentSpeed;
@@ -83,11 +117,16 @@ namespace Components
         }
 
         #if UNITY_EDITOR
-        void OnDrawGizmosSelected()
+        [Header("Debug")]
+        [SerializeField] bool enableDebug;
+        [SerializeField] Color debugColor = Color.red;
+
+        void OnDrawGizmos()
         {
+            if (!enableDebug) return;
             if (!rigidbody) return;
 
-            Gizmos.color = Color.red;
+            Gizmos.color = debugColor;
             var endPosition = rigidbody.position + Vector3.down * groundCheckDistance;
             Gizmos.DrawLine(rigidbody.position, endPosition);
             Gizmos.DrawWireSphere(endPosition, groundCheckRadius);
