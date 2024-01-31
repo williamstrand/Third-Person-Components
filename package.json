@@ -10,6 +10,6 @@
     "url": ""
   },
   "dependencies": {
-    "https://github.com/williamstrand/Utilities.git": "1.0.0"
+    "com.wsp.utilities": "https://github.com/williamstrand/Utilities.git"
   }
 }
