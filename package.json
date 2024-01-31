@@ -8,5 +8,8 @@
     "name": "WSP",
     "email": "william.strandpaurell@gmail.com",
     "url": ""
+  },
+  "dependencies": {
+    "com.wsp.utilities" : "1.0.0"
   }
 }
