@@ -8,8 +8,5 @@
     "name": "WSP",
     "email": "william.strandpaurell@gmail.com",
     "url": ""
-  },
-  "dependencies": {
-    "com.wsp.utilities": "https://github.com/williamstrand/Utilities.git"
   }
 }

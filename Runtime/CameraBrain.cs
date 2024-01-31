@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
-using Utilities.Timer;
 
-namespace Components
+namespace ThirdPersonComponents
 {
     [RequireComponent(typeof(Camera))]
     public class CameraBrain : MonoBehaviour

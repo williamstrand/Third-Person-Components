@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Components
+namespace ThirdPersonComponents
 {
     public class CameraComponent : MonoBehaviour
     {
