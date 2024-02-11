@@ -59,15 +59,11 @@ namespace ThirdPersonComponents
         Quaternion targetRotation;
         Quaternion CurrentRotation => rigidbody.rotation;
 
-        void Update()
+        void FixedUpdate()
         {
             // Update speed
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.deltaTime * acceleration);
             targetSpeed = 0;
-        }
-
-        void FixedUpdate()
-        {
             // Move character
             var velocity = currentDirection * currentSpeed;
             rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
