@@ -5,9 +5,9 @@ namespace ThirdPersonComponents
     public class CameraComponent : MonoBehaviour
     {
         [Header("Camera movement")]
-        [SerializeField] Vector2 rotationLimits = new(-45, 45);
+        [SerializeField] Vector2 rotationLimits = new(0, 45);
 
-        [SerializeField] float cameraSmoothing = 100f;
+        [SerializeField] float cameraSmoothing = 30;
 
         [Header("Camera position")]
         [SerializeField] Transform target;
