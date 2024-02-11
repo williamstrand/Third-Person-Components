@@ -1,7 +1,9 @@
 {
     "name": "ThirdPersonComponents",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:789bd75071004ee4181fb0cfbcc7359c"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
