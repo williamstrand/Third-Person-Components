@@ -60,14 +60,11 @@ namespace ThirdPersonComponents
         float targetXRotation;
         float targetYRotation;
 
-        void Awake()
+        void Start()
         {
             cameraBoom = new GameObject("Camera Boom").transform;
             cameraBoom.hideFlags = HideFlags.HideInHierarchy;
-        }
-
-        void Start()
-        {
+            
             cameraAttachment = new CameraAttachment();
             if (attachOnStart) CameraBrain.Attach(cameraAttachment);
         }
@@ -79,7 +76,6 @@ namespace ThirdPersonComponents
             targetYRotation += direction.x * speed;
 
             // Clamp the rotation of the camera boom to the rotation limits
-            if (targetXRotation > 180) targetXRotation -= 360;
             targetXRotation = Mathf.Clamp(targetXRotation, rotationLimits.x, rotationLimits.y);
         }
 
