@@ -30,6 +30,30 @@ namespace ThirdPersonComponents
             }
         }
 
+        public Vector2 RotationLimits
+        {
+            get => rotationLimits;
+            set => rotationLimits = value;
+        }
+
+        public Transform Target
+        {
+            get => target;
+            set => target = value;
+        }
+
+        public Vector2 CameraOffset
+        {
+            get => cameraOffset;
+            set => cameraOffset = value;
+        }
+        
+        public float CameraDistance
+        {
+            get => cameraDistance;
+            set => cameraDistance = Mathf.Max(0, value);
+        }
+
         CameraAttachment cameraAttachment;
         Transform cameraBoom;
 

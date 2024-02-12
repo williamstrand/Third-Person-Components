@@ -42,8 +42,6 @@ namespace ThirdPersonComponents
             if (!isAttached) return;
 
             cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, Time.fixedDeltaTime * PositionSmoothTime);
-            // cameraTransform.position = currentAttachment.Position;
-            // cameraTransform.forward = currentAttachment.Forward;
             camera.transform.forward = Vector3.Lerp(camera.transform.forward, targetForward, Time.fixedDeltaTime * RotationSmoothTime);
         }
 
