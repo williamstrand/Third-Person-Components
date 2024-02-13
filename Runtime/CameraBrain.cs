@@ -37,7 +37,7 @@ namespace ThirdPersonComponents
         void FixedUpdate()
         {
             cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, Time.fixedDeltaTime * PositionSmoothTime);
-            camera.transform.forward = Vector3.Lerp(camera.transform.forward, targetForward, Time.fixedDeltaTime * RotationSmoothTime);
+            cameraTransform.forward = Vector3.Lerp(cameraTransform.forward, targetForward, Time.fixedDeltaTime * RotationSmoothTime);
         }
 
         public static void Attach(CameraAttachment attachment)
