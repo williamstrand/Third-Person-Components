@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
-using Utilities.Timer;
+﻿using UnityEngine;
 
 namespace ThirdPersonComponents
 {
@@ -19,13 +17,12 @@ namespace ThirdPersonComponents
         Vector3 targetPosition;
         Vector3 targetForward;
 
-        bool isAttached;
-
         void Awake()
         {
             if (instance != null)
             {
                 Destroy(gameObject);
+                Debug.LogWarning("Multiple CameraBrains detected. Destroying the new one.");
                 return;
             }
 
@@ -39,8 +36,6 @@ namespace ThirdPersonComponents
 
         void FixedUpdate()
         {
-            if (!isAttached) return;
-
             cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, Time.fixedDeltaTime * PositionSmoothTime);
             camera.transform.forward = Vector3.Lerp(camera.transform.forward, targetForward, Time.fixedDeltaTime * RotationSmoothTime);
         }
@@ -52,28 +47,10 @@ namespace ThirdPersonComponents
                 instance.currentAttachment.OnValueChanged -= instance.OnAttachmentValueChanged;
             }
 
-            instance.StartCoroutine(instance.AttachCoroutine(attachment));
-        }
-
-        IEnumerator AttachCoroutine(CameraAttachment attachment)
-        {
-            isAttached = false;
-            currentAttachment = attachment;
-
-            var originalPosition = cameraTransform.position;
-            var originalForward = cameraTransform.forward;
-            var timer = new Timer(AttachTime);
-
-            while (!timer.IsCompleted)
-            {
-                timer.Update(Time.deltaTime);
-                cameraTransform.position = Vector3.Lerp(originalPosition, attachment.Position, timer.Progress);
-                cameraTransform.forward = Vector3.Lerp(originalForward, attachment.Forward, timer.Progress);
-                yield return null;
-            }
-
-            isAttached = true;
-            currentAttachment.OnValueChanged += OnAttachmentValueChanged;
+            instance.currentAttachment = attachment;
+            instance.currentAttachment.OnValueChanged += instance.OnAttachmentValueChanged;
+            instance.targetForward = attachment.Forward;
+            instance.targetPosition = attachment.Position;
         }
 
         void OnAttachmentValueChanged(Vector3 position, Vector3 forward)

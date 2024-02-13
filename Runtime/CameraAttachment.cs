@@ -16,6 +16,7 @@ namespace ThirdPersonComponents
                 OnValueChanged?.Invoke(Position, Forward);
             }
         }
+
         public Vector3 Forward
         {
             get => forward;
