@@ -76,11 +76,11 @@ void Update()
 ### Usage:
 The [`CameraBrain`](Runtime/CameraBrain.cs) handles the camera position and rotation.
 It works by attaching it to a [`CameraAttachment`](Runtime/CameraAttachment.cs) using the `Attach` method
-and then updating the position and rotation of the camera to the position and rotation of the `CameraAttachment` it is attached to.
+and then updating the position and rotation of the camera to the position and rotation of the [`CameraAttachment`](Runtime/CameraAttachment.cs) it is attached to.
 
 ### How it works:
-The `Attach` method updates the `currentAttachment` of the brain and subscribes to the `OnValueChanged` event of the `CameraAttachment`.
-Then it updates the `targetPosition` and `targetForward` of the brain to the `Position` and `Forward` of the `CameraAttachment`.
+The `Attach` method updates the `currentAttachment` of the brain and subscribes to the `OnValueChanged` event of the [`CameraAttachment`](Runtime/CameraAttachment.cs).
+Then it updates the `targetPosition` and `targetForward` of the brain to the `Position` and `Forward` of the [`CameraAttachment`](Runtime/CameraAttachment.cs).
 
 ```csharp
 public static void Attach(CameraAttachment attachment)
@@ -103,7 +103,7 @@ void OnAttachmentValueChanged(Vector3 position, Vector3 forward)
 }
 ```
 
-The `Position` and `Forward` properties of the `CameraAttachment` automatically invokes `OnValueChanged` when they are updated.
+The `Position` and `Forward` properties of the [`CameraAttachment`](Runtime/CameraAttachment.cs) automatically invokes `OnValueChanged` when they are updated.
 ```csharp
 public Action<Vector3, Vector3> OnValueChanged { get; set; }
 
