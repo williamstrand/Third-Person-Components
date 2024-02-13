@@ -22,7 +22,7 @@ The [`CameraComponent`](Runtime/CameraComponent.cs) also has multiple public pro
 
 ### How it works:
 In the `Start` method a new `GameObject`. This is used as a camera boom to handle rotation and positioning of the camera easier.
-A new `CameraAttachment` is also created and the camera is attached to the `CameraBrain` if `attachOnStart` is set to true.
+A new [`CameraAttachment`](Runtime/CameraAttachment.cs) is also created and the camera is attached to the [`CameraBrain`](Runtime/CameraBrain.cs) if `attachOnStart` is set to true.
 ```csharp
 void Start()
 {
