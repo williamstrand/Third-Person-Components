@@ -72,6 +72,74 @@ void Update()
 }
 ```
 
+## [`CameraBrain`](Runtime/CameraBrain.cs)
+### Usage:
+The [`CameraBrain`](Runtime/CameraBrain.cs) handles the camera position and rotation.
+It works by attaching it to a [`CameraAttachment`](Runtime/CameraAttachment.cs) using the `Attach` method
+and then updating the position and rotation of the camera to the position and rotation of the `CameraAttachment` it is attached to.
+
+### How it works:
+The `Attach` method updates the `currentAttachment` of the brain and subscribes to the `OnValueChanged` event of the `CameraAttachment`.
+Then it updates the `targetPosition` and `targetForward` of the brain to the `Position` and `Forward` of the `CameraAttachment`.
+
+```csharp
+public static void Attach(CameraAttachment attachment)
+{
+    if (instance.currentAttachment != null)
+    {
+        instance.currentAttachment.OnValueChanged -= instance.OnAttachmentValueChanged;
+    }
+    
+    instance.currentAttachment = attachment;
+    instance.currentAttachment.OnValueChanged += instance.OnAttachmentValueChanged;
+    instance.targetForward = attachment.Forward;
+    instance.targetPosition = attachment.Position;
+}
+
+void OnAttachmentValueChanged(Vector3 position, Vector3 forward)
+{
+    targetPosition = position;
+    targetForward = forward;
+}
+```
+
+The `Position` and `Forward` properties of the `CameraAttachment` automatically invokes `OnValueChanged` when they are updated.
+```csharp
+public Action<Vector3, Vector3> OnValueChanged { get; set; }
+
+public Vector3 Position
+{
+    get => position;
+    set
+    {
+        position = value;
+        OnValueChanged?.Invoke(Position, Forward);
+    }
+}
+
+public Vector3 Forward
+{
+    get => forward;
+    set
+    {
+        forward = value;
+        OnValueChanged?.Invoke(Position, Forward);
+    }
+}
+
+Vector3 position;
+Vector3 forward;
+```
+
+In the `FixedUpdate` method the position and rotation of the camera is lerped to the `targetPosition` and `targetForward` of the brain.
+```csharp
+void FixedUpdate()
+{
+    cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPosition, Time.fixedDeltaTime * PositionSmoothTime);
+    cameraTransform.forward = Vector3.Lerp(cameraTransform.forward, targetForward, Time.fixedDeltaTime * RotationSmoothTime);
+}
+```
+
 ## [`MovementComponent`](Runtime/MovementComponent.cs)
 ### Usage:
 The [`MovementComponent`](Runtime/MovementComponent.cs) is used to move the character.
