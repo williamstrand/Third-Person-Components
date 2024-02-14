@@ -62,8 +62,9 @@ namespace ThirdPersonComponents
         void FixedUpdate()
         {
             // Update speed
-            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.deltaTime * acceleration);
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
             targetSpeed = 0;
+
             // Move character
             var velocity = currentDirection * currentSpeed;
             rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
