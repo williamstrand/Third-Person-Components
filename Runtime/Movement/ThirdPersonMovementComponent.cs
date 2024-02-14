@@ -78,6 +78,12 @@ namespace ThirdPersonComponents.Movement
             rigidbody.MoveRotation(lookRotation);
         }
 
+        /// <summary>
+        /// Start moving the character in a direction.
+        /// </summary>
+        /// <param name="direction">the direction to move in.</param>
+        /// <param name="forward">the forward direction of the camera.</param>
+        /// <param name="speed">the speed to move at.</param>
         public override void Move(Vector2 direction, Vector3 forward, float speed)
         {
             if (direction.sqrMagnitude == 0) return;
@@ -98,6 +104,9 @@ namespace ThirdPersonComponents.Movement
             targetSpeed = speed;
         }
 
+        /// <summary>
+        /// Makes character jump.
+        /// </summary>
         public void Jump()
         {
             if (!CheckIfGrounded()) return;
@@ -106,6 +115,10 @@ namespace ThirdPersonComponents.Movement
             rigidbody.velocity += new Vector3(rigidbody.velocity.x, jumpHeight, rigidbody.velocity.z);
         }
 
+        /// <summary>
+        /// Checks if the character is on the ground.
+        /// </summary>
+        /// <returns>true if character is on the ground.</returns>
         bool CheckIfGrounded()
         {
             var size = Physics.SphereCastNonAlloc(rigidbody.position, groundCheckRadius, Vector3.down, new RaycastHit[1], groundCheckDistance, groundLayer);

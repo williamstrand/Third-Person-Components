@@ -69,6 +69,11 @@ namespace ThirdPersonComponents.Camera
             if (attachOnStart) CameraBrain.Attach(cameraAttachment);
         }
 
+        /// <summary>
+        /// Rotates the camera.
+        /// </summary>
+        /// <param name="direction">the direction to rotate in.</param>
+        /// <param name="speed">the speed of the rotation.</param>
         public void Rotate(Vector2 direction, float speed)
         {
             // Update target x and y rotation
