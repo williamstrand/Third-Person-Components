@@ -66,7 +66,6 @@ namespace ThirdPersonComponents.Movement
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
             targetSpeed = 0;
 
-
             // Move character
             var velocity = currentDirection * currentSpeed;
             rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
@@ -96,12 +95,11 @@ namespace ThirdPersonComponents.Movement
 
             // Set direction and target speed
             currentDirection = translatedDirection;
+            targetSpeed = speed;
 
             // Set target rotation
             var velocity = currentDirection;
             targetRotation = Quaternion.LookRotation(velocity);
-
-            targetSpeed = speed;
         }
 
         /// <summary>
@@ -112,7 +110,7 @@ namespace ThirdPersonComponents.Movement
             if (!CheckIfGrounded()) return;
             if (rigidbody.velocity.y > 0) return;
 
-            rigidbody.velocity += new Vector3(rigidbody.velocity.x, jumpHeight, rigidbody.velocity.z);
+            rigidbody.velocity += new Vector3(0, jumpHeight, 0);
         }
 
         /// <summary>

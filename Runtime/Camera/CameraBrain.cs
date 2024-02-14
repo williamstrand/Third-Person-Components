@@ -40,6 +40,10 @@ namespace ThirdPersonComponents.Camera
             cameraTransform.forward = Vector3.Lerp(cameraTransform.forward, targetForward, Time.fixedDeltaTime * RotationSmoothTime);
         }
 
+        /// <summary>
+        ///     Attaches the camera to a camera attachment.
+        /// </summary>
+        /// <param name="attachment"></param>
         public static void Attach(CameraAttachment attachment)
         {
             if (instance.currentAttachment != null)
@@ -53,6 +57,11 @@ namespace ThirdPersonComponents.Camera
             instance.targetPosition = attachment.Position;
         }
 
+        /// <summary>
+        ///     Updates target position and forward.
+        /// </summary>
+        /// <param name="position">the new position.</param>
+        /// <param name="forward">the new forward direction.</param>
         void OnAttachmentValueChanged(Vector3 position, Vector3 forward)
         {
             targetPosition = position;
