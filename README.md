@@ -150,7 +150,6 @@ This method will move the character in the direction of the movement input.
 The `Jump` method is used to make the character jump.
 
 The [`ThirdPersonMovementComponent`](Runtime/Movement/ThirdPersonMovementComponent.cs) also has multiple public properties that can be used to change the behavior of the movement:
-- `Speed` is the speed of the character.
 - `Acceleration` is the acceleration of the character.
 - `RotationSpeed` is the speed of the rotation of the character.
 - `AutoRotate` is a bool that determines if the character should rotate towards the movement direction automatically.
@@ -160,20 +159,23 @@ The [`ThirdPersonMovementComponent`](Runtime/Movement/ThirdPersonMovementCompone
 The `Move` method takes the movement direction and the forward direction of the camera as arguments and translates the direction to the local space of the camera.
 Then it updates the `currentDirection` of the character to the translated direction and the `targetRotation` to the quaternion rotation of the translated direction.
 ```csharp
-public override void Move(Vector2 direction, Vector3 forward)
+public override void Move(Vector2 direction, Vector3 forward, float speed)
 {
     if (direction.sqrMagnitude == 0) return;
-    
+
     // Translate direction to forward vector
+    forward.y = 0;
     var right = Vector3.Cross(Vector3.up, forward);
     var direction3 = new Vector3(direction.x, 0, direction.y);
     var translatedDirection = direction3.x * right + direction3.z * forward;
-    
+
     // Set direction and target speed
-    currentDirection = new Vector3(translatedDirection.x, 0, translatedDirection.y);
-    
+    currentDirection = translatedDirection;
+    targetSpeed = speed;
+
     // Set target rotation
-    targetRotation = Quaternion.LookRotation(currentDirection.normalized);
+    var velocity = currentDirection;
+    targetRotation = Quaternion.LookRotation(velocity);
 }
 ```
 
@@ -185,9 +187,9 @@ If `autoRotate` is set to true the character is rotated towards the `targetRotat
 void FixedUpdate()
 {
     // Update speed
-    currentSpeed = Mathf.MoveTowards(currentSpeed, Speed, Time.fixedDeltaTime * acceleration);
-    Speed = 0;
-
+    currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
+    targetSpeed = 0;
+    
     // Move character
     var velocity = currentDirection * currentSpeed;
     rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
@@ -200,7 +202,8 @@ void FixedUpdate()
 }
 ```
 
-The `Jump` method sets the `velocity` of the `Rigidbody` to the square root of `JumpHeight` multiplied by `-2` and `gravity`.
+The `Jump` method sets the upwards `velocity` of the `Rigidbody` to `jumpHeight` if the character is grounded and not already jumping.
+The `CheckIfGrounded` method uses `Physics.SphereCastNonAlloc` to check if the character is grounded.
 ```csharp        
 public void Jump()
 {
@@ -214,5 +217,115 @@ bool CheckIfGrounded()
 {
     var size = Physics.SphereCastNonAlloc(rigidbody.position, groundCheckRadius, Vector3.down, new RaycastHit[1], groundCheckDistance, groundLayer);
     return size > 0;
+}
+```
+
+## [`LedgeGrabComponent`](Runtime/Movement/LedgeGrab/LedgeGrabComponent.cs)
+### Usage:
+The [`LedgeGrabComponent`](Runtime/Movement/LedgeGrab/LedgeGrabComponent.cs) is used to make the character be able to grab ledges.
+It constantly checks if the character is able to grab a ledge and if it is, it will make the character grab the ledge.
+
+It has two public methods `Move` and `Release`. `Move` takes a `Vector2`, `Vector3` and a `float` as arguments.
+`Move` makes the character climb on the edge if able to.
+The `Vector2` is the movement direction, the `Vector3` is the forward direction of the camera and the `float` is the speed of the movement.
+`Release` makes the character release the ledge.
+
+The `OnLedgeGrab` event is invoked when the character grabs a ledge and the `OnLedgeRelease` event is invoked when the character releases the ledge.
+
+The [`LedgeGrabComponent`](Runtime/Movement/LedgeGrab/LedgeGrabComponent.cs) also has multiple variables that can be used to change the behavior of the ledge grab:
+- `grabRange` is the distance the character checks for and can grab onto ledges.
+- `grabGracePeriod` is how long it takes before the character can grab a ledge again after releasing one.
+- `moveDelay` is how long it takes before the character can move again after moving on a ledge.
+- `moveDistance` is the distance the character moves when moving on a ledge.
+
+### How it works:
+In the `Update` method the `moveDelayTimer` and `grabGraceTimer` are updated. It also checks if the character is able to grab a ledge and if it is, it will make the character grab the ledge.
+```csharp
+void Update()
+{
+    // If the character is not moving and the move delay is enabled, decrease the move delay timer
+    if (!IsMoving && MoveDelayEnabled)
+    {
+        moveDelayTimer -= Time.deltaTime;
+    }
+
+    // If the grab grace is enabled, decrease the grab grace timer and return
+    if (GrabGraceEnabled)
+    {
+        grabGraceTimer -= Time.deltaTime;
+        return;
+    }
+
+    // If the character is not grabbing the ledge, check for a ledge
+    if (IsGrabbingLedge) return;
+    if (!CheckForLedge(out var ledge)) return;
+
+    // Attach to the found ledge
+    OnLedgeGrab?.Invoke();
+    AttachToLedge(ledge);
+}
+
+bool CheckForLedge(out RaycastHit hitInfo, Vector3 origin, Vector3 direction)
+{
+    return Physics.Raycast(origin, direction, out hitInfo, grabRange, grabbableLayers);
+}
+```
+In the `AttachToLedge` method `targetPosition` and `targetDirection` is updated and the gravity is disabled.
+```csharp
+void AttachToLedge(RaycastHit ledge)
+{
+    // Disable gravity and reset velocity
+    rigidbody.useGravity = false;
+    rigidbody.velocity = Vector3.zero;
+
+    IsGrabbingLedge = true;
+    moveDelayTimer = moveDelay;
+
+    // Set target position and direction
+    targetPosition = ledge.point + ledge.normal * grabRange / 2;
+    targetPosition.y = ledge.transform.position.y;
+    targetDirection = -ledge.normal;
+}
+```
+In the `Move` method it first checks if the character is able to move and if it is, it will make the character climb on the edge.
+First it translates the movement direction to the local space of the camera.
+Then it checks for a ledge in the direction of movement and if it finds one, it will make the character climb on the ledge.
+If no ledge is found, it will check for a ledge in the direction of movement, but closer to the character.
+If no ledge is still not found, the method will return.
+```csharp
+public override void Move(Vector2 direction, Vector3 forward, float speed)
+{
+    if (!IsGrabbingLedge) return;
+    if (direction.sqrMagnitude == 0) return;
+    if (IsMoving) return;
+    if (MoveDelayEnabled) return;
+    if (Mathf.Abs(direction.x) < XMoveThreshold) return;
+
+    // Translate direction to camera local space
+    var right = Vector3.Cross(Vector3.up, forward);
+    var translatedDirection = direction.x * right + direction.y * forward;
+
+    // Check for a ledge in the direction of movement
+    var moveDirection = characterTransform.right * (Mathf.Sign(translatedDirection.x) * moveDistance);
+    if (!CheckForLedge(out var hitInfo, characterTransform.position + moveDirection, characterTransform.forward))
+    {
+        // Check for a ledge in the direction of movement, but closer to the character
+        if (!CheckForLedge(out hitInfo, characterTransform.position + moveDirection / 2, characterTransform.forward)) return;
+    }
+    
+    currentSpeed = speed;
+    AttachToLedge(hitInfo);
+}
+```
+In the `FixedUpdate` method the character is moved towards the `targetPosition` if the character is currently moving on a ledge.
+```csharp
+void FixedUpdate()
+{
+    if (!IsGrabbingLedge) return;
+    if (!IsMoving) return;
+
+    // Update character position and rotation
+    characterTransform.position = Vector3.MoveTowards(characterTransform.position, targetPosition, Time.fixedDeltaTime * currentSpeed);
+    characterTransform.forward = Vector3.MoveTowards(characterTransform.forward, targetDirection, Time.fixedDeltaTime * currentSpeed);
 }
 ```
