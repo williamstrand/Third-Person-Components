@@ -2,19 +2,19 @@
 I have created movement and camera components for a third person game.
 They are mostly for my portfolio but should be able to be used in a real game. 
 
-## [`CameraComponent`](Runtime/CameraComponent.cs)
+## [`CameraComponent`](Runtime/Camera/CameraComponent.cs)
 ### Usage:
-For the [`CameraComponent`](Runtime/CameraComponent.cs) to work, the main camera need to have the [`CameraBrain`](Runtime/CameraBrain.cs) script attached to it.
-The [`CameraBrain`](Runtime/CameraBrain.cs) class has a static method `Attach` that takes a [`CameraAttachment`](Runtime/CameraAttachment.cs) as an argument.
-[`CameraAttachment`](Runtime/CameraAttachment.cs) is a class that has the properties `Position` and `Forward`.
+For the [`CameraComponent`](Runtime/Camera/CameraComponent.cs) to work, the main camera need to have the [`CameraBrain`](Runtime/Camera/CameraBrain.cs) script attached to it.
+The [`CameraBrain`](Runtime/Camera/CameraBrain.cs) class has a static method `Attach` that takes a [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs) as an argument.
+[`CameraAttachment`](Runtime/Camera/CameraAttachment.cs) is a class that has the properties `Position` and `Forward`.
 The `Position` is the target position of the camera and the `Forward` is the target forward vector of the camera.
 By changing the values of these properties the camera will smoothly update its position and facing direction.
 
-The [`CameraComponent`](Runtime/CameraComponent.cs) has a public method `Rotate` that takes a `Vector2` and a `float` as arguments.
+The [`CameraComponent`](Runtime/Camera/CameraComponent.cs) has a public method `Rotate` that takes a `Vector2` and a `float` as arguments.
 The `Vector2` is the input from the mouse and the `float` is the sensitivity of the camera.
 This method will rotate the camera around the player.
 
-The [`CameraComponent`](Runtime/CameraComponent.cs) also has multiple public properties that can be used to change the behavior of the camera:
+The [`CameraComponent`](Runtime/Camera/CameraComponent.cs) also has multiple public properties that can be used to change the behavior of the camera:
 - `RotationLimits` is the limits of the rotation of the camera in the y axis.
 - `Target` is the target of the camera.
 - `CameraOffset` is the offset from the player to the camera.
@@ -22,7 +22,7 @@ The [`CameraComponent`](Runtime/CameraComponent.cs) also has multiple public pro
 
 ### How it works:
 In the `Start` method a new `GameObject`. This is used as a camera boom to handle rotation and positioning of the camera easier.
-A new [`CameraAttachment`](Runtime/CameraAttachment.cs) is also created and the camera is attached to the [`CameraBrain`](Runtime/CameraBrain.cs) if `attachOnStart` is set to true.
+A new [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs) is also created and the camera is attached to the [`CameraBrain`](Runtime/Camera/CameraBrain.cs) if `attachOnStart` is set to true.
 ```csharp
 void Start()
 {
@@ -72,15 +72,15 @@ void Update()
 }
 ```
 
-## [`CameraBrain`](Runtime/CameraBrain.cs)
+## [`CameraBrain`](Runtime/Camera/CameraBrain.cs)
 ### Usage:
-The [`CameraBrain`](Runtime/CameraBrain.cs) handles the camera position and rotation.
-It works by attaching it to a [`CameraAttachment`](Runtime/CameraAttachment.cs) using the `Attach` method
-and then updating the position and rotation of the camera to the position and rotation of the [`CameraAttachment`](Runtime/CameraAttachment.cs) it is attached to.
+The [`CameraBrain`](Runtime/Camera/CameraBrain.cs) handles the camera position and rotation.
+It works by attaching it to a [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs) using the `Attach` method
+and then updating the position and rotation of the camera to the position and rotation of the [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs) it is attached to.
 
 ### How it works:
-The `Attach` method updates the `currentAttachment` of the brain and subscribes to the `OnValueChanged` event of the [`CameraAttachment`](Runtime/CameraAttachment.cs).
-Then it updates the `targetPosition` and `targetForward` of the brain to the `Position` and `Forward` of the [`CameraAttachment`](Runtime/CameraAttachment.cs).
+The `Attach` method updates the `currentAttachment` of the brain and subscribes to the `OnValueChanged` event of the [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs).
+Then it updates the `targetPosition` and `targetForward` of the brain to the `Position` and `Forward` of the [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs).
 
 ```csharp
 public static void Attach(CameraAttachment attachment)
@@ -103,7 +103,7 @@ void OnAttachmentValueChanged(Vector3 position, Vector3 forward)
 }
 ```
 
-The `Position` and `Forward` properties of the [`CameraAttachment`](Runtime/CameraAttachment.cs) automatically invokes `OnValueChanged` when they are updated.
+The `Position` and `Forward` properties of the [`CameraAttachment`](Runtime/Camera/CameraAttachment.cs) automatically invokes `OnValueChanged` when they are updated.
 ```csharp
 public Action<Vector3, Vector3> OnValueChanged { get; set; }
 
@@ -140,8 +140,8 @@ void FixedUpdate()
 }
 ```
 
-## [`MovementComponent`](Runtime/MovementComponent.cs)
+## [`MovementComponent`](Runtime/Movement/MovementComponent.cs)
 ### Usage:
-The [`MovementComponent`](Runtime/MovementComponent.cs) is used to move the character.
+The [`MovementComponent`](Runtime/Movement/MovementComponent.cs) is used to move the character.
 It has a public method `Move` that takes a `Vector2` and `float` as arguments.
 The `Vector2` is the movement direction and the `float` is the speed of the character.
