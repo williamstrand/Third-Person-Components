@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ThirdPersonComponents
+namespace ThirdPersonComponents.Movement
 {
     public class MovementComponent : MonoBehaviour
     {

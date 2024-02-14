@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace ThirdPersonComponents
+namespace ThirdPersonComponents.Camera
 {
-    [RequireComponent(typeof(Camera))]
+    [RequireComponent(typeof(UnityEngine.Camera))]
     public class CameraBrain : MonoBehaviour
     {
         const float AttachTime = .2f;
@@ -10,7 +10,7 @@ namespace ThirdPersonComponents
         const float PositionSmoothTime = 30;
         static CameraBrain instance;
 
-        new Camera camera;
+        new UnityEngine.Camera camera;
         CameraAttachment currentAttachment;
         Transform cameraTransform;
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ThirdPersonComponents
+namespace ThirdPersonComponents.Camera
 {
     public sealed class CameraAttachment
     {
