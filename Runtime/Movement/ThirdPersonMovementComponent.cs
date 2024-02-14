@@ -9,6 +9,7 @@ namespace ThirdPersonComponents.Movement
         [Header("Walking")]
         [SerializeField] float acceleration = 10;
         [SerializeField] public float rotationSpeed = 10;
+        [SerializeField] bool autoRotate = true;
 
         [Header("Jumping")]
         [SerializeField] public float jumpHeight = 6;
@@ -52,7 +53,7 @@ namespace ThirdPersonComponents.Movement
             set => groundLayer = value;
         }
 
-        public override float Speed { get; set; }
+        float targetSpeed;
         float currentSpeed;
         Vector3 currentDirection;
 
@@ -62,33 +63,39 @@ namespace ThirdPersonComponents.Movement
         void FixedUpdate()
         {
             // Update speed
-            currentSpeed = Mathf.MoveTowards(currentSpeed, Speed, Time.fixedDeltaTime * acceleration);
-            Speed = 0;
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
+            targetSpeed = 0;
+
 
             // Move character
             var velocity = currentDirection * currentSpeed;
             rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
+
+            if (!autoRotate) return;
 
             // Update rotation
             var lookRotation = Quaternion.Lerp(CurrentRotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
             rigidbody.MoveRotation(lookRotation);
         }
 
-        public override void Move(Vector2 direction, Vector3 forward)
+        public override void Move(Vector2 direction, Vector3 forward, float speed)
         {
             if (direction.sqrMagnitude == 0) return;
 
             // Translate direction to forward vector
+            forward.y = 0;
             var right = Vector3.Cross(Vector3.up, forward);
             var direction3 = new Vector3(direction.x, 0, direction.y);
             var translatedDirection = direction3.x * right + direction3.z * forward;
 
             // Set direction and target speed
-            currentDirection = new Vector3(translatedDirection.x, 0, translatedDirection.y);
+            currentDirection = translatedDirection;
 
             // Set target rotation
-            var velocity = currentDirection * Speed;
+            var velocity = currentDirection;
             targetRotation = Quaternion.LookRotation(velocity);
+
+            targetSpeed = speed;
         }
 
         public void Jump()

@@ -17,26 +17,28 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         [Header("Moving On Ledge")]
         [SerializeField] float moveDelay = .2f;
         [SerializeField] float moveDistance = .5f;
-        [SerializeField] float speed = 5;
 
         public Action OnLedgeGrab { get; set; }
         public Action OnLedgeRelease { get; set; }
         public bool IsGrabbingLedge { get; private set; }
-        public override float Speed
-        {
-            get => speed;
-            set => speed = Mathf.Max(0, value);
-        }
 
-        public bool IsMoving => transform.position != targetPosition || transform.forward != targetDirection;
-        public bool GrabGraceEnabled => grabGraceTimer > 0;
-        public bool MoveDelayEnabled => moveDelayTimer > 0;
+        bool IsMoving => transform.position != targetPosition || transform.forward != targetDirection;
+        bool GrabGraceEnabled => grabGraceTimer > 0;
+        bool MoveDelayEnabled => moveDelayTimer > 0;
 
         Vector3 targetPosition;
         Vector3 targetDirection;
+        float currentSpeed = 5;
 
         float grabGraceTimer;
         float moveDelayTimer;
+
+        Transform characterTransform;
+
+        void Start()
+        {
+            characterTransform = transform;
+        }
 
         void Update()
         {
@@ -63,8 +65,8 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             if (!IsGrabbingLedge) return;
             if (!IsMoving) return;
 
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.fixedDeltaTime * Speed);
-            transform.forward = Vector3.MoveTowards(transform.forward, targetDirection, Time.fixedDeltaTime * Speed);
+            characterTransform.position = Vector3.MoveTowards(characterTransform.position, targetPosition, Time.fixedDeltaTime * currentSpeed);
+            characterTransform.forward = Vector3.MoveTowards(characterTransform.forward, targetDirection, Time.fixedDeltaTime * currentSpeed);
         }
 
         public void Release()
@@ -75,7 +77,7 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             OnLedgeRelease?.Invoke();
         }
 
-        public override void Move(Vector2 direction, Vector3 forward)
+        public override void Move(Vector2 direction, Vector3 forward, float speed)
         {
             if (!IsGrabbingLedge) return;
             if (direction.sqrMagnitude == 0) return;
@@ -86,19 +88,20 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             var right = Vector3.Cross(Vector3.up, forward);
             var translatedDirection = direction.x * right + direction.y * forward;
 
-            var moveDirection = transform.right * (Mathf.Sign(translatedDirection.x) * moveDistance);
+            var moveDirection = characterTransform.right * (Mathf.Sign(translatedDirection.x) * moveDistance);
 
-            if (!CheckForLedge(out var hitInfo, transform.position + moveDirection, transform.forward))
+            if (!CheckForLedge(out var hitInfo, characterTransform.position + moveDirection, characterTransform.forward))
             {
-                if (!CheckForLedge(out hitInfo, transform.position + moveDirection / 2, transform.forward)) return;
+                if (!CheckForLedge(out hitInfo, characterTransform.position + moveDirection / 2, characterTransform.forward)) return;
             }
 
+            currentSpeed = speed;
             AttachToLedge(hitInfo);
         }
 
         bool CheckForLedge(out RaycastHit hitInfo)
         {
-            return CheckForLedge(out hitInfo, transform.position, transform.forward);
+            return CheckForLedge(out hitInfo, characterTransform.position, characterTransform.forward);
         }
 
         bool CheckForLedge(out RaycastHit hitInfo, Vector3 origin, Vector3 direction)
@@ -110,12 +113,13 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         {
             rigidbody.useGravity = false;
             rigidbody.velocity = Vector3.zero;
+
             IsGrabbingLedge = true;
+            moveDelayTimer = moveDelay;
+
             targetPosition = ledge.point + ledge.normal * grabRange / 2;
             targetPosition.y = ledge.transform.position.y;
             targetDirection = -ledge.normal;
-
-            moveDelayTimer = moveDelay;
 
             #if UNITY_EDITOR
             if (enableDebug) Debug.DrawRay(ledge.point, ledge.normal * grabRange / 2, Color.red, 1f);

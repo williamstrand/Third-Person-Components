@@ -140,8 +140,79 @@ void FixedUpdate()
 }
 ```
 
-## [`MovementComponent`](Runtime/Movement/MovementComponent.cs)
+## [`ThirdPersonMovementComponent`](Runtime/Movement/ThirdPersonMovementComponent.cs)
 ### Usage:
-The [`MovementComponent`](Runtime/Movement/MovementComponent.cs) is used to move the character.
-It has a public method `Move` that takes a `Vector2` and `float` as arguments.
-The `Vector2` is the movement direction and the `float` is the speed of the character.
+The [`ThirdPersonMovementComponent`](Runtime/Movement/ThirdPersonMovementComponent.cs) is used to move the character.
+It has a public method `Move` that takes a `Vector2` and a `Vector3` as arguments.
+The `Vector2` is the movement direction and the `Vector3` is the forward direction of the camera.
+This method will move the character in the direction of the movement input.
+
+The `Jump` method is used to make the character jump.
+
+The [`ThirdPersonMovementComponent`](Runtime/Movement/ThirdPersonMovementComponent.cs) also has multiple public properties that can be used to change the behavior of the movement:
+- `Speed` is the speed of the character.
+- `Acceleration` is the acceleration of the character.
+- `RotationSpeed` is the speed of the rotation of the character.
+- `AutoRotate` is a bool that determines if the character should rotate towards the movement direction automatically.
+- `JumpHeight` is the height of the jump.
+
+### How it works:
+The `Move` method takes the movement direction and the forward direction of the camera as arguments and translates the direction to the local space of the camera.
+Then it updates the `currentDirection` of the character to the translated direction and the `targetRotation` to the quaternion rotation of the translated direction.
+```csharp
+public override void Move(Vector2 direction, Vector3 forward)
+{
+    if (direction.sqrMagnitude == 0) return;
+    
+    // Translate direction to forward vector
+    var right = Vector3.Cross(Vector3.up, forward);
+    var direction3 = new Vector3(direction.x, 0, direction.y);
+    var translatedDirection = direction3.x * right + direction3.z * forward;
+    
+    // Set direction and target speed
+    currentDirection = new Vector3(translatedDirection.x, 0, translatedDirection.y);
+    
+    // Set target rotation
+    targetRotation = Quaternion.LookRotation(currentDirection.normalized);
+}
+```
+
+In the `FixedUpdate` method the `currentSpeed` is lerped to the `Speed`. 
+The speed is then set to 0 to make the character stop if no input is pressed the next frame.
+Then the character is moved in the direction of the `currentDirection` with the speed of `currentSpeed`.
+If `autoRotate` is set to true the character is rotated towards the `targetRotation` with the speed of `rotationSpeed`.
+```csharp
+void FixedUpdate()
+{
+    // Update speed
+    currentSpeed = Mathf.MoveTowards(currentSpeed, Speed, Time.fixedDeltaTime * acceleration);
+    Speed = 0;
+
+    // Move character
+    var velocity = currentDirection * currentSpeed;
+    rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
+
+    if (!autoRotate) return;
+
+    // Update rotation
+    var lookRotation = Quaternion.Lerp(CurrentRotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
+    rigidbody.MoveRotation(lookRotation);
+}
+```
+
+The `Jump` method sets the `velocity` of the `Rigidbody` to the square root of `JumpHeight` multiplied by `-2` and `gravity`.
+```csharp        
+public void Jump()
+{
+    if (!CheckIfGrounded()) return;
+    if (rigidbody.velocity.y > 0) return;
+
+    rigidbody.velocity += new Vector3(0, jumpHeight, 0);
+}
+
+bool CheckIfGrounded()
+{
+    var size = Physics.SphereCastNonAlloc(rigidbody.position, groundCheckRadius, Vector3.down, new RaycastHit[1], groundCheckDistance, groundLayer);
+    return size > 0;
+}
+```
