@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ThirdPersonComponents.Movement.LedgeGrab
 {
-    public class LedgeGrabComponent : MonoBehaviour
+    public class LedgeGrabComponent : MovementComponent
     {
         const float XMoveThreshold = .5f;
 
@@ -17,15 +17,15 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         [Header("Moving On Ledge")]
         [SerializeField] float moveDelay = .2f;
         [SerializeField] float moveDistance = .5f;
-        [SerializeField] float moveSpeed = 5;
+        [SerializeField] float speed = 5;
 
         public Action OnLedgeGrab { get; set; }
         public Action OnLedgeRelease { get; set; }
         public bool IsGrabbingLedge { get; private set; }
-        public float MoveSpeed
+        public override float Speed
         {
-            get => moveSpeed;
-            set => moveSpeed = Mathf.Max(0, value);
+            get => speed;
+            set => speed = Mathf.Max(0, value);
         }
 
         public bool IsMoving => transform.position != targetPosition || transform.forward != targetDirection;
@@ -63,8 +63,8 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             if (!IsGrabbingLedge) return;
             if (!IsMoving) return;
 
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.fixedDeltaTime * MoveSpeed);
-            transform.forward = Vector3.MoveTowards(transform.forward, targetDirection, Time.fixedDeltaTime * MoveSpeed);
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, Time.fixedDeltaTime * Speed);
+            transform.forward = Vector3.MoveTowards(transform.forward, targetDirection, Time.fixedDeltaTime * Speed);
         }
 
         public void Release()
@@ -75,7 +75,7 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             OnLedgeRelease?.Invoke();
         }
 
-        public void Move(Vector2 direction)
+        public override void Move(Vector2 direction, Vector3 forward)
         {
             if (!IsGrabbingLedge) return;
             if (direction.sqrMagnitude == 0) return;
@@ -83,7 +83,10 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             if (MoveDelayEnabled) return;
             if (Mathf.Abs(direction.x) < XMoveThreshold) return;
 
-            var moveDirection = transform.right * (Mathf.Sign(direction.x) * moveDistance);
+            var right = Vector3.Cross(Vector3.up, forward);
+            var translatedDirection = direction.x * right + direction.y * forward;
+
+            var moveDirection = transform.right * (Mathf.Sign(translatedDirection.x) * moveDistance);
 
             if (!CheckForLedge(out var hitInfo, transform.position + moveDirection, transform.forward))
             {
