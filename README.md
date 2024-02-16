@@ -157,7 +157,7 @@ The [`ThirdPersonMovementComponent`](Runtime/Movement/ThirdPersonMovementCompone
 
 ### How it works:
 The `Move` method takes the movement direction and the forward direction of the camera as arguments and translates the direction to the local space of the camera.
-Then it updates the `currentDirection` of the character to the translated direction and the `targetRotation` to the quaternion rotation of the translated direction.
+Then it updates the `targetVelocity` of the character to the translated direction multiplied by the speed and the `targetRotation` to the quaternion rotation of the translated direction.
 ```csharp
 public override void Move(Vector2 direction, Vector3 forward, float speed)
 {
@@ -170,29 +170,25 @@ public override void Move(Vector2 direction, Vector3 forward, float speed)
     var translatedDirection = direction3.x * right + direction3.z * forward;
 
     // Set direction and target speed
-    currentDirection = translatedDirection;
-    targetSpeed = speed;
+    targetVelocity = translatedDirection * speed;
 
     // Set target rotation
-    var velocity = currentDirection;
+    var velocity = targetVelocity.normalized;
+    velocity.y = 0;
     targetRotation = Quaternion.LookRotation(velocity);
 }
 ```
 
-In the `FixedUpdate` method the `currentSpeed` is lerped to the `Speed`. 
-The speed is then set to 0 to make the character stop if no input is pressed the next frame.
-Then the character is moved in the direction of the `currentDirection` with the speed of `currentSpeed`.
+In the `FixedUpdate` method the velocity of the `rigidbody` is moved towards the `targetVelocity`. 
+The `targetVelocity` is then set to `Vector3.zero` to make the character stop if no input is pressed the next frame.
 If `autoRotate` is set to true the character is rotated towards the `targetRotation` with the speed of `rotationSpeed`.
 ```csharp
 void FixedUpdate()
 {
-    // Update speed
-    currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
-    targetSpeed = 0;
-    
-    // Move character
-    var velocity = currentDirection * currentSpeed;
-    rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
+    // Update velocity
+    targetVelocity.y = rigidbody.velocity.y;
+    rigidbody.velocity = Vector3.MoveTowards(rigidbody.velocity, targetVelocity, Time.fixedDeltaTime * acceleration);
+    targetVelocity = Vector3.zero;
 
     if (!autoRotate) return;
 

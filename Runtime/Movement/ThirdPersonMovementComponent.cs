@@ -62,6 +62,7 @@ namespace ThirdPersonComponents.Movement
 
         void FixedUpdate()
         {
+<<<<<<< Updated upstream
             // Update speed
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
             targetSpeed = 0;
@@ -69,6 +70,12 @@ namespace ThirdPersonComponents.Movement
             // Move character
             var velocity = currentDirection * currentSpeed;
             rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
+=======
+            // Update velocity
+            targetVelocity.y = rigidbody.velocity.y;
+            rigidbody.velocity = Vector3.MoveTowards(rigidbody.velocity, targetVelocity, Time.fixedDeltaTime * acceleration);
+            targetVelocity = Vector3.zero;
+>>>>>>> Stashed changes
 
             if (!autoRotate) return;
 
