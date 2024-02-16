@@ -47,11 +47,13 @@ namespace ThirdPersonComponents.Movement
             set => groundCheckRadius = Mathf.Max(0, value);
         }
 
-        public LayerMask GroundLayer
+        public Vector3 TargetVelocity
         {
-            get => groundLayer;
-            set => groundLayer = value;
+            get => targetVelocity;
+            set => targetVelocity = value;
         }
+
+        public Vector3 Velocity => rigidbody.velocity;
 
         Vector3 targetVelocity;
 
@@ -64,7 +66,7 @@ namespace ThirdPersonComponents.Movement
             targetVelocity.y = rigidbody.velocity.y;
             rigidbody.velocity = Vector3.MoveTowards(rigidbody.velocity, targetVelocity, Time.fixedDeltaTime * acceleration);
             targetVelocity = Vector3.zero;
-            
+
             if (!autoRotate) return;
 
             // Update rotation
