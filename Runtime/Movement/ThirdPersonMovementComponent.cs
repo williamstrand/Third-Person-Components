@@ -53,22 +53,16 @@ namespace ThirdPersonComponents.Movement
             set => groundLayer = value;
         }
 
-        float targetSpeed;
-        float currentSpeed;
-        Vector3 currentDirection;
+        Vector3 targetVelocity;
 
         Quaternion targetRotation;
         Quaternion CurrentRotation => rigidbody.rotation;
 
         void FixedUpdate()
         {
-            // Update speed
-            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, Time.fixedDeltaTime * acceleration);
-            targetSpeed = 0;
-
-            // Move character
-            var velocity = currentDirection * currentSpeed;
-            rigidbody.MovePosition(rigidbody.position + velocity * Time.fixedDeltaTime);
+            targetVelocity.y = rigidbody.velocity.y;
+            rigidbody.velocity = Vector3.MoveTowards(rigidbody.velocity, targetVelocity, Time.fixedDeltaTime * acceleration);
+            targetVelocity = Vector3.zero;
 
             if (!autoRotate) return;
 
@@ -78,7 +72,7 @@ namespace ThirdPersonComponents.Movement
         }
 
         /// <summary>
-        /// Start moving the character in a direction.
+        ///     Start moving the character in a direction.
         /// </summary>
         /// <param name="direction">the direction to move in.</param>
         /// <param name="forward">the forward direction of the camera.</param>
@@ -94,16 +88,16 @@ namespace ThirdPersonComponents.Movement
             var translatedDirection = direction3.x * right + direction3.z * forward;
 
             // Set direction and target speed
-            currentDirection = translatedDirection;
-            targetSpeed = speed;
+            targetVelocity = translatedDirection * speed;
 
             // Set target rotation
-            var velocity = currentDirection;
+            var velocity = targetVelocity.normalized;
+            velocity.y = 0;
             targetRotation = Quaternion.LookRotation(velocity);
         }
 
         /// <summary>
-        /// Makes character jump.
+        ///     Makes character jump.
         /// </summary>
         public void Jump()
         {
@@ -114,7 +108,7 @@ namespace ThirdPersonComponents.Movement
         }
 
         /// <summary>
-        /// Checks if the character is on the ground.
+        ///     Checks if the character is on the ground.
         /// </summary>
         /// <returns>true if character is on the ground.</returns>
         bool CheckIfGrounded()
