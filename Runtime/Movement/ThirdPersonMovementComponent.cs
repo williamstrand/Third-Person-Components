@@ -1,3 +1,4 @@
+using ThirdPersonComponents.Extensions;
 using UnityEngine;
 
 namespace ThirdPersonComponents.Movement
@@ -53,7 +54,19 @@ namespace ThirdPersonComponents.Movement
             set => targetVelocity = value;
         }
 
-        public Vector3 Velocity => rigidbody.velocity;
+        public Vector3 Velocity
+        {
+            get => rigidbody.velocity;
+            set => rigidbody.velocity = new Vector3(value.x, 0, value.z);
+        }
+
+        public bool AutoRotate
+        {
+            get => autoRotate;
+            set => autoRotate = value;
+        }
+
+        public bool LockVelocity { get; set; }
 
         Vector3 targetVelocity;
 
@@ -62,11 +75,15 @@ namespace ThirdPersonComponents.Movement
 
         void FixedUpdate()
         {
-            // Update velocity
-            targetVelocity.y = rigidbody.velocity.y;
-            rigidbody.velocity = Vector3.MoveTowards(rigidbody.velocity, targetVelocity, Time.fixedDeltaTime * acceleration);
-            targetVelocity = Vector3.zero;
+            UpdateVelocity();
+            UpdateRotation();
+        }
 
+        /// <summary>
+        ///     Updates the rotation of the character.
+        /// </summary>
+        void UpdateRotation()
+        {
             if (!autoRotate) return;
 
             // Update rotation
@@ -75,20 +92,30 @@ namespace ThirdPersonComponents.Movement
         }
 
         /// <summary>
+        ///     Updates the velocity of the character.
+        /// </summary>
+        void UpdateVelocity()
+        {
+            if (LockVelocity) return;
+
+            // Update velocity
+            targetVelocity.y = rigidbody.velocity.y;
+            rigidbody.velocity = Vector3.MoveTowards(rigidbody.velocity, targetVelocity, Time.fixedDeltaTime * acceleration);
+            targetVelocity = Vector3.zero;
+        }
+
+        /// <summary>
         ///     Start moving the character in a direction.
         /// </summary>
         /// <param name="direction">the direction to move in.</param>
-        /// <param name="forward">the forward direction of the camera.</param>
         /// <param name="speed">the speed to move at.</param>
-        public override void Move(Vector2 direction, Vector3 forward, float speed)
+        /// <param name="forward">the forward direction of the camera.</param>
+        public override void Move(Vector2 direction, float speed, Vector3 forward)
         {
             if (direction.sqrMagnitude == 0) return;
 
-            // Translate direction to forward vector
-            forward.y = 0;
-            var right = Vector3.Cross(Vector3.up, forward);
-            var direction3 = new Vector3(direction.x, 0, direction.y);
-            var translatedDirection = direction3.x * right + direction3.z * forward;
+            // Translate direction to camera local space
+            var translatedDirection = direction.ToLocalSpace(forward.Flatten());
 
             // Set direction and target speed
             targetVelocity = translatedDirection * speed;

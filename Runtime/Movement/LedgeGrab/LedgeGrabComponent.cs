@@ -1,4 +1,5 @@
 ﻿using System;
+using ThirdPersonComponents.Extensions;
 using UnityEngine;
 
 namespace ThirdPersonComponents.Movement.LedgeGrab
@@ -75,7 +76,7 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         }
 
         /// <summary>
-        /// Drop from the ledge.
+        ///     Drop from the ledge.
         /// </summary>
         public void Release()
         {
@@ -86,12 +87,12 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         }
 
         /// <summary>
-        /// Moves the character on the ledge.
+        ///     Moves the character on the ledge.
         /// </summary>
         /// <param name="direction">the direction to move in.</param>
-        /// <param name="forward">the forward direction of the camera.</param>
         /// <param name="speed">the speed to move at.</param>
-        public override void Move(Vector2 direction, Vector3 forward, float speed)
+        /// <param name="forward">the forward direction of the camera.</param>
+        public override void Move(Vector2 direction, float speed, Vector3 forward)
         {
             if (!IsGrabbingLedge) return;
             if (direction.sqrMagnitude == 0) return;
@@ -100,8 +101,7 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
             if (Mathf.Abs(direction.x) < XMoveThreshold) return;
 
             // Translate direction to camera local space
-            var right = Vector3.Cross(Vector3.up, forward);
-            var translatedDirection = direction.x * right + direction.y * forward;
+            var translatedDirection = direction.ToLocalSpace(forward.Flatten());
 
             // Check for a ledge in the direction of movement
             var moveDirection = characterTransform.right * (Mathf.Sign(translatedDirection.x) * moveDistance);
@@ -110,13 +110,13 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
                 // Check for a ledge in the direction of movement, but closer to the character
                 if (!CheckForLedge(out hitInfo, characterTransform.position + moveDirection / 2, characterTransform.forward)) return;
             }
-            
+
             currentSpeed = speed;
             AttachToLedge(hitInfo);
         }
 
         /// <summary>
-        /// Checks for a ledge in front of the character.
+        ///     Checks for a ledge in front of the character.
         /// </summary>
         /// <param name="hitInfo">the RaycastHit of the found ledge.</param>
         /// <returns>true if a ledge was found.</returns>
@@ -126,7 +126,7 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         }
 
         /// <summary>
-        /// Checks for a ledge at target position.
+        ///     Checks for a ledge at target position.
         /// </summary>
         /// <param name="hitInfo">the RaycastHit of the found ledge.</param>
         /// <param name="origin">the origin position of the check.</param>
@@ -138,7 +138,7 @@ namespace ThirdPersonComponents.Movement.LedgeGrab
         }
 
         /// <summary>
-        /// Attaches character to a ledge.
+        ///     Attaches character to a ledge.
         /// </summary>
         /// <param name="ledge">the ledge to attach to.</param>
         void AttachToLedge(RaycastHit ledge)
