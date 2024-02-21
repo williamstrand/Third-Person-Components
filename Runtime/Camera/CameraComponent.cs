@@ -49,6 +49,12 @@ namespace ThirdPersonComponents.Camera
             get => cameraOffset;
             set => cameraOffset = value;
         }
+        
+        public Vector2 CameraLookOffset
+        {
+            get => cameraLookOffset;
+            set => cameraLookOffset = value;
+        }
 
         public float CameraDistance
         {
