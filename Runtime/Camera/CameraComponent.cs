@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using ThirdPersonComponents.Extensions;
+using UnityEngine;
 
 namespace ThirdPersonComponents.Camera
 {
@@ -13,6 +14,7 @@ namespace ThirdPersonComponents.Camera
         [SerializeField] Transform target;
 
         [SerializeField] Vector2 cameraOffset;
+        [SerializeField] Vector2 cameraLookOffset;
         [SerializeField] float cameraDistance = 5f;
 
         [Space(10)]
@@ -47,7 +49,7 @@ namespace ThirdPersonComponents.Camera
             get => cameraOffset;
             set => cameraOffset = value;
         }
-        
+
         public float CameraDistance
         {
             get => cameraDistance;
@@ -64,13 +66,13 @@ namespace ThirdPersonComponents.Camera
         {
             cameraBoom = new GameObject("Camera Boom").transform;
             cameraBoom.hideFlags = HideFlags.HideInHierarchy;
-            
+
             cameraAttachment = new CameraAttachment();
             if (attachOnStart) CameraBrain.Attach(cameraAttachment);
         }
 
         /// <summary>
-        /// Rotates the camera.
+        ///     Rotates the camera.
         /// </summary>
         /// <param name="direction">the direction to rotate in.</param>
         /// <param name="speed">the speed of the rotation.</param>
@@ -86,6 +88,8 @@ namespace ThirdPersonComponents.Camera
 
         void Update()
         {
+            var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
+
             // Lerp the rotation of the camera boom to the target rotation
             var eulerAngles = cameraBoom.eulerAngles;
             var currentXRotation = Mathf.LerpAngle(eulerAngles.x, targetXRotation, cameraSmoothing * Time.deltaTime);
@@ -95,14 +99,31 @@ namespace ThirdPersonComponents.Camera
             cameraBoom.eulerAngles = new Vector3(currentXRotation, currentYRotation, 0);
 
             // Set the position of the camera
-            cameraAttachment.Position = cameraBoom.position + cameraDistance * -cameraBoom.forward;
+            var distance = cameraDistance;
+            if (CheckForWall(out var hitInfo))
+            {
+                var point = hitInfo.point.Flatten();
+                distance = Vector3.Distance(point, target.position.Flatten());
+                //distance = hitInfo.distance - 0.1f;
+            }
+
+            cameraAttachment.Position = cameraBoom.position + distance * -cameraBoom.forward;
 
             // Set the position of the camera boom
-            cameraBoom.position = TargetPosition;
+            // cameraBoom.position = TargetPosition;
+            cameraBoom.position = target.position;
 
             // Set the rotation of the camera
-            var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
             cameraAttachment.Forward = directionToTarget;
+        }
+
+        bool CheckForWall(out RaycastHit hitInfo)
+        {
+            var direction = cameraAttachment.Position - target.position;
+            var ray = new Ray(target.position, direction);
+            var didHit = Physics.Raycast(ray, out hitInfo, cameraDistance);
+            Debug.DrawRay(target.position, direction * cameraDistance, didHit ? Color.red : Color.green);
+            return didHit;
         }
     }
 }
