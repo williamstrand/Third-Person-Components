@@ -49,9 +49,12 @@ public void Rotate(Vector2 direction, float speed)
 ```
 
 In the `Update` method the rotation of the camera boom is lerped to the target rotation and the `cameraAttachment.Position` and `cameraAttachment.Forward` is updated accordingly.
+If a wall is detected between the camera and the target, the distance is set to the distance between the wall and the target.
 ```csharp
 void Update()
 {
+    var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
+
     // Lerp the rotation of the camera boom to the target rotation
     var eulerAngles = cameraBoom.eulerAngles;
     var currentXRotation = Mathf.LerpAngle(eulerAngles.x, targetXRotation, cameraSmoothing * Time.deltaTime);
@@ -61,13 +64,21 @@ void Update()
     cameraBoom.eulerAngles = new Vector3(currentXRotation, currentYRotation, 0);
 
     // Set the position of the camera
-    cameraAttachment.Position = cameraBoom.position + cameraDistance * -cameraBoom.forward;
+    var distance = cameraDistance;
+    if (CheckForWall(out var hitInfo))
+    {
+        var point = hitInfo.point.Flatten();
+        distance = Vector3.Distance(point, target.position.Flatten());
+        //distance = hitInfo.distance - 0.1f;
+    }
+
+    cameraAttachment.Position = cameraBoom.position + distance * -cameraBoom.forward;
 
     // Set the position of the camera boom
-    cameraBoom.position = TargetPosition;
+    // cameraBoom.position = TargetPosition;
+    cameraBoom.position = target.position;
 
     // Set the rotation of the camera
-    var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
     cameraAttachment.Forward = directionToTarget;
 }
 ```
