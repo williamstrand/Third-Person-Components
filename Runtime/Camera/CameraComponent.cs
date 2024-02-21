@@ -22,7 +22,7 @@ namespace ThirdPersonComponents.Camera
 
         public Vector3 Forward => cameraAttachment.Forward;
 
-        Vector3 TargetPosition
+        protected virtual Vector3 TargetPosition
         {
             get
             {
@@ -62,7 +62,7 @@ namespace ThirdPersonComponents.Camera
         float targetXRotation;
         float targetYRotation;
 
-        void Start()
+        protected virtual void Start()
         {
             cameraBoom = new GameObject("Camera Boom").transform;
             cameraBoom.hideFlags = HideFlags.HideInHierarchy;
@@ -76,7 +76,7 @@ namespace ThirdPersonComponents.Camera
         /// </summary>
         /// <param name="direction">the direction to rotate in.</param>
         /// <param name="speed">the speed of the rotation.</param>
-        public void Rotate(Vector2 direction, float speed)
+        public virtual void Rotate(Vector2 direction, float speed)
         {
             // Update target x and y rotation
             targetXRotation -= direction.y * speed;
@@ -95,7 +95,7 @@ namespace ThirdPersonComponents.Camera
             CameraBrain.Attach(cameraAttachment);
         }
 
-        void Update()
+        protected virtual void Update()
         {
             var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
 
