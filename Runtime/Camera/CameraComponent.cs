@@ -85,6 +85,15 @@ namespace ThirdPersonComponents.Camera
             // Clamp the rotation of the camera boom to the rotation limits
             targetXRotation = Mathf.Clamp(targetXRotation, rotationLimits.x, rotationLimits.y);
         }
+        
+        /// <summary>
+        /// Attaches the camera to the camera brain.
+        /// </summary>
+        /// <returns></returns>
+        public void Attach()
+        {
+            CameraBrain.Attach(cameraAttachment);
+        }
 
         void Update()
         {
