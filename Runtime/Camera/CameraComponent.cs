@@ -27,7 +27,7 @@ namespace ThirdPersonComponents.Camera
             get
             {
                 var eulerAngles = cameraBoom.eulerAngles;
-                var offset = Quaternion.Euler(eulerAngles.x, eulerAngles.y, 0) * cameraOffset;
+                var offset = Quaternion.Euler(eulerAngles.x, eulerAngles.y, 0) * cameraLookOffset;
                 return target.position + offset;
             }
         }
@@ -85,9 +85,9 @@ namespace ThirdPersonComponents.Camera
             // Clamp the rotation of the camera boom to the rotation limits
             targetXRotation = Mathf.Clamp(targetXRotation, rotationLimits.x, rotationLimits.y);
         }
-        
+
         /// <summary>
-        /// Attaches the camera to the camera brain.
+        ///     Attaches the camera to the camera brain.
         /// </summary>
         /// <returns></returns>
         public void Attach()
@@ -97,7 +97,6 @@ namespace ThirdPersonComponents.Camera
 
         protected virtual void Update()
         {
-            var directionToTarget = (TargetPosition - cameraAttachment.Position).normalized;
 
             // Lerp the rotation of the camera boom to the target rotation
             var eulerAngles = cameraBoom.eulerAngles;
@@ -106,6 +105,12 @@ namespace ThirdPersonComponents.Camera
 
             // Set the rotation of the camera boom
             cameraBoom.eulerAngles = new Vector3(currentXRotation, currentYRotation, 0);
+
+
+            // Set the position of the camera boom
+            // cameraBoom.position = TargetPosition;
+            var offset = cameraOffset.ToLocalSpace(cameraAttachment.Forward);
+            cameraBoom.position = target.position + offset;
 
             // Set the position of the camera
             var distance = cameraDistance;
@@ -118,11 +123,8 @@ namespace ThirdPersonComponents.Camera
 
             cameraAttachment.Position = cameraBoom.position + distance * -cameraBoom.forward;
 
-            // Set the position of the camera boom
-            // cameraBoom.position = TargetPosition;
-            cameraBoom.position = target.position;
-
             // Set the rotation of the camera
+            var directionToTarget = (TargetPosition + offset - cameraAttachment.Position).normalized;
             cameraAttachment.Forward = directionToTarget;
         }
 

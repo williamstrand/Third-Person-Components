@@ -5,7 +5,7 @@ namespace ThirdPersonComponents.Extensions
     public static class Extensions
     {
         /// <summary>
-        /// Sets a Vector3's y component to 0.
+        ///     Sets a Vector3's y component to 0.
         /// </summary>
         /// <param name="vector">the vector to update</param>
         /// <returns>the flattened vector</returns>
@@ -15,7 +15,7 @@ namespace ThirdPersonComponents.Extensions
         }
 
         /// <summary>
-        /// Converts a Vector2 to a Vector3 in another Vector3's local space.
+        ///     Converts a Vector2 to a Vector3 in another Vector3's local space.
         /// </summary>
         /// <param name="direction">the original direction</param>
         /// <param name="forward">the forward vector of the local space vector</param>
@@ -25,6 +25,12 @@ namespace ThirdPersonComponents.Extensions
             var right = Vector3.Cross(Vector3.up, forward);
             var direction3 = new Vector3(direction.x, 0, direction.y);
             return direction3.x * right + direction3.z * forward;
+        }
+
+        public static Vector3 ToLocalSpace(this Vector3 direction, Vector3 forward)
+        {
+            var right = Vector3.Cross(Vector3.up, forward);
+            return direction.x * right + direction.y * Vector3.up + direction.z * forward;
         }
     }
 }
