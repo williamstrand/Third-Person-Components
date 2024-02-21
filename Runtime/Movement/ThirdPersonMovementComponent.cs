@@ -126,6 +126,12 @@ namespace ThirdPersonComponents.Movement
             targetRotation = Quaternion.LookRotation(velocity);
         }
 
+        public void Rotate(Vector2 direction)
+        {
+            var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            targetRotation = Quaternion.Euler(0, angle, 0);
+        }
+
         /// <summary>
         ///     Makes character jump.
         /// </summary>
